@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+.idea
+
+# fake raspberry pi lib
+/RPi/
+
+# logfiles
+*.log
