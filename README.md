@@ -47,6 +47,7 @@ There's a number of command line options available beyond the ones that come wit
 - -i : s3 uri link to the s3 file containing the input directory that has been compressed into a .tgz, tar.gz, or zip file. (for example: s3://psitestdata/inputs/inputs.tgz)
 - -j : job s3 bucket. a uri for an s3 bucket to collect the job inputs/outputs. will contain the individual runs from this job set (s3://daycent-jobs/jobs/1234)
 - -r : run id (optional) : just a folder name to tack on to the job s3 uri to store job specific info. If not set, one will be created with the name `run12345678` where 123455678 is replaced with the epoch time in seconds.
+- -o : copy entire run directory after the DayCent run to the s3 job/run/outputs directory (the directory gets created on the fly)
 
 Putting this all together to run a simple case with no extend file set looks like:
-`docker run -it daycent-cabbi:latest -s rainmore_eq -n rainmore_eq -l yes -i s3://my-daycent-jobs/jobs/myjob/input_data.tgz -j s3://my-daycent-jobs/jobs/myjob -r job1`
+`docker run -it daycent-cabbi:latest -s rainmore_eq -n rainmore_eq -l yes -i s3://my-daycent-jobs/jobs/myjob/input_data.tgz -j s3://my-daycent-jobs/jobs/myjob -r job1 -o yes`
