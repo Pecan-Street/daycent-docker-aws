@@ -7,7 +7,7 @@ start=$(date +%s)
 cd /daycent
 
 # using getopts to parse out the command line options
-while getopts s:n:m:l:e:f:g:i:j:r:o: flag; do
+while getopts s:n:m:l:e:f:g:i:j:r:o:d: flag; do
   case "${flag}" in
   # -s : schedule file name (without the .sch extension)
   s) sopt=${OPTARG} ;;
@@ -31,6 +31,9 @@ while getopts s:n:m:l:e:f:g:i:j:r:o: flag; do
   r) ropt=${OPTARG} ;;
   # -o : if set (with anything) copy entire run directory to the s3 job/run/outputs directory (the directory gets created on the fly)
   o) oopt=${OPTARG} ;;
+  # -d : s3 uri link to a "diff" archive. A .tgz or .zip file that will be downloaded and layered over top of the input
+  #  directory after the input directory is downloaded and extracted. expected format is a directory with the files in it that will be moved from that directory up into the input directory
+  d) dopt=${OPTARG} ;;
   \?) # invalid option
     echo "Invalid option: -$OPTARG" >&2
     exit
@@ -48,6 +51,8 @@ echo "iopt = $iopt"
 echo "jopt = $jopt"
 echo "ropt = $ropt"
 echo "oopt = $oopt"
+echo "dopt = $dopt"
+
 
 ddcent="/daycent/DayCent"
 # echo "${ddcent}"
@@ -100,6 +105,31 @@ if [ -n "$iopt" ]; then
   dirname="${dirname%.*}"
   echo "cd'ing into ${dirname}"
   cd ${dirname}
+
+  # if the diff flag was set, then grab that directory and overlay it onto the outputs
+  if [ -n "$dopt" ]; then
+    echo "Downloading diff file from S3: ${dopt}"
+    aws s3 cp "${dopt}" .
+    # do the same song and dance to figure out whether it is a zip or tgz or tar.gz and decopress it
+    difffilename=$(echo "$dopt" | sed "s:.*/::")
+    diffextension="${difffilename##*.}"
+    if [ "$diffextension" == "tgz" ] || [[ "$difffilename" == *"tar.gz"* ]]; then
+      echo "Found either tgz or tar.gz, decompressing $difffilename:"
+      tar xzvf "${difffilename}"
+      rm -rf "${difffilename}"
+    elif [ "$diffextension" == "zip" ]; then
+      echo "found a zipfile, decompressing $difffilename:"
+      unzip "${difffilename}"
+      rm -rf "${difffilename}"
+    fi
+    diffdirname="${difffilename%.*}"
+    # in case it was a tar.gz clip off that ".tar" bit
+    diffdirname="${diffdirname%.*}"
+    mv "${diffdirname}"/* .
+  fi # end -d/$dopt
+else
+  echo "No input directory specified with -i flag. Exiting."
+  exit 1
 fi
 
 # if we set to download the monthly binary file go grab it from s3

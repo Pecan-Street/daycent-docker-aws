@@ -48,6 +48,19 @@ There's a number of command line options available beyond the ones that come wit
 - -j : job s3 bucket. a uri for an s3 bucket to collect the job inputs/outputs. will contain the individual runs from this job set (s3://daycent-jobs/jobs/1234)
 - -r : run id (optional) : just a folder name to tack on to the job s3 uri to store job specific info. If not set, one will be created with the name `run12345678` where 123455678 is replaced with the epoch time in seconds.
 - -o : copy entire run directory after the DayCent run to the s3 job/run/outputs directory (the directory gets created on the fly)
+- -d : s3 uri link to a "diff" archive. A .tgz or .zip file that will be downloaded and layered over top of the input directory after the input directory is downloaded and extracted. 
+The expected format is a directory with the files in it that will be moved from that directory up into the input directory. For example if you wanted to just vary the outvars.txt you'd create a directory, put your new outvars.txt in it,
+compress the entire directory, upload it to s3, and reference it with the `-d` option with something like `-d s3://my-daycent-jobs/jobs/inputs/diffs/diff.tgz`
+The idea is if you are doing runs where you want to just vary a few things in a few of the input files, you can just put those here and not have to create and store the entire input deck over and over.
 
 Putting this all together to run a simple case with no extend file set looks like:
+
 `docker run -it daycent-cabbi:latest -s rainmore_eq -n rainmore_eq -l yes -i s3://my-daycent-jobs/jobs/myjob/input_data.tgz -j s3://my-daycent-jobs/jobs/myjob -r job1 -o yes`
+
+or if you are extending of a binary file then:
+
+`docker run -it daycent-cabbi:latest -s rainmore_base -n rainmore_base -e rainmore_eq -f s3://my-daycent-jobs/jobs/tutorialinputs/j1234/run1657051616/outputs/rainmore_eq.bin -l yes -i s3://my-daycent-jobs/jobs/tutorialinputs/tutorial_data.tgz -j s3://my-daycent-jobs/jobs/tutorialinputs/jBin -o yes` 
+
+or if you are using a diff then :
+
+`docker run -it daycent-cabbi:latest -s rainmore_base -n rainmore_base -e rainmore_eq -f s3://my-daycent-jobs/jobs/tutorialinputs/j1234/run1657051616/outputs/rainmore_eq.bin -l yes -i s3://my-daycent-jobs/jobs/tutorialinputs/tutorial_data.tgz -j s3://my-daycent-jobs/jobs/tutorialinputs/jBin -d s3://my-daycent-jobs/jobs/inputs/diffs/diff.tgz -o yes` 
