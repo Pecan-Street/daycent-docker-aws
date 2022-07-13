@@ -135,3 +135,6 @@ dmypy.json
 
 # logfiles
 *.log
+
+# certificate files
+*.pem
