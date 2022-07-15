@@ -34,7 +34,7 @@ while getopts s:n:m:l:e:f:g:i:j:r:o:d:c: flag; do
   # -d : s3 uri link to a "diff" archive. A .tgz or .zip file that will be downloaded and layered over top of the input
   #  directory after the input directory is downloaded and extracted. expected format is a directory with the files in it that will be moved from that directory up into the input directory
   d) dopt=${OPTARG} ;;
-  # -c capture exectuable outputs as logfiles (optional) : if specified (with any value at all) it will redirect stdout and stderr to files called daycent.log.txt and list100.log.txt.
+  # -c : capture exectuable outputs as logfiles (optional). Example: "-c yes" If specified (with any value at all) it will redirect stdout and stderr to files called daycent.log.txt and list100.log.txt.
   # If not specified then the output will just be printed to stdout/stderr. The former is better for use with things like AWS batch, the later if you're running locally and want to watch the output as it runs.
   c) copt=${OPTARG} ;;
   \?) # invalid option
