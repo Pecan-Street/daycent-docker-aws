@@ -52,6 +52,8 @@ There's a number of command line options available beyond the ones that come wit
 The expected format is a directory with the files in it that will be moved from that directory up into the input directory. For example if you wanted to just vary the outvars.txt you'd create a directory, put your new outvars.txt in it,
 compress the entire directory, upload it to s3, and reference it with the `-d` option with something like `-d s3://my-daycent-jobs/jobs/inputs/diffs/diff.tgz`
 The idea is if you are doing runs where you want to just vary a few things in a few of the input files, you can just put those here and not have to create and store the entire input deck over and over.
+- -c : capture executable outputs as logfiles (optional) : if specified (with any value at all) it will redirect stdout and stderr to files called daycent.log.txt and list100.log.txt. 
+If not specified then the output will just be printed to stdout/stderr. The former is better for use with things like AWS batch, the later if you're running locally and want to watch the output as it runs. 
 
 Putting this all together to run a simple case with no extend file set looks like:
 

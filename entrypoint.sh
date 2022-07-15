@@ -7,7 +7,7 @@ start=$(date +%s)
 cd /daycent
 
 # using getopts to parse out the command line options
-while getopts s:n:m:l:e:f:g:i:j:r:o:d: flag; do
+while getopts s:n:m:l:e:f:g:i:j:r:o:d:c: flag; do
   case "${flag}" in
   # -s : schedule file name (without the .sch extension)
   s) sopt=${OPTARG} ;;
@@ -34,6 +34,9 @@ while getopts s:n:m:l:e:f:g:i:j:r:o:d: flag; do
   # -d : s3 uri link to a "diff" archive. A .tgz or .zip file that will be downloaded and layered over top of the input
   #  directory after the input directory is downloaded and extracted. expected format is a directory with the files in it that will be moved from that directory up into the input directory
   d) dopt=${OPTARG} ;;
+  # -c capture exectuable outputs as logfiles (optional) : if specified (with any value at all) it will redirect stdout and stderr to files called daycent.log.txt and list100.log.txt.
+  # If not specified then the output will just be printed to stdout/stderr. The former is better for use with things like AWS batch, the later if you're running locally and want to watch the output as it runs.
+  c) copt=${OPTARG} ;;
   \?) # invalid option
     echo "Invalid option: -$OPTARG" >&2
     exit
@@ -52,6 +55,7 @@ echo "jopt = $jopt"
 echo "ropt = $ropt"
 echo "oopt = $oopt"
 echo "dopt = $dopt"
+echo "copt = $copt"
 
 
 ddcent="/daycent/DayCent"
@@ -144,13 +148,28 @@ if [ -n "$fopt" ]; then
   aws s3 cp ${fopt} .
 fi
 
-echo "Running ${ddcent}"
+# if we're capturing stderr and stdout to a logfile, then add that to the command
+if [ -n "$copt" ]; then
+  ddcent="${ddcent} > daycent.log.txt 2>&1"
+fi
 
+# Run Daycent !
+echo "Running ${ddcent}"
 ${ddcent}
+
+# if we're capturing that logfile, then upload it to the run folder on aws s3
+if [ -n "$copt" ]; then
+  aws s3 cp daycent.log.txt ${jopt}/${runid}/daycent.log.txt
+fi
+
 
 # if the -l command line option was specified then run list100 and fix the output file format
 if [ -n "$list" ]; then
   runlist="/daycent/list100 ${sopt} ${nopt} outvars.txt"
+  # if we're capturing stderr and stdout to a logfile, then add that to the command
+  if [ -n "$copt" ]; then
+    runlist="${runlist} > list100.log.txt 2>&1"
+  fi
   echo "Running List100 with ${runlist}"
   ${runlist}
   # clean up the outfile
@@ -159,6 +178,10 @@ if [ -n "$list" ]; then
   # copy output to s3 job bucket
   aws s3 cp ${sopt}.lis ${jopt}/${runid}/${sopt}.lis
   aws s3 cp outfile.lis.csv ${jopt}/${runid}/outfile.lis.csv
+  if [ -n "$copt" ]; then
+    aws s3 cp list100.log.txt ${jopt}/${runid}/list100.log.txt
+  fi
+
 fi
 
 # this just copies everything recursively to the run directory in a new directory called outputs
