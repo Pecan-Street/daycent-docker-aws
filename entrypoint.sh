@@ -178,6 +178,7 @@ if [ -n "$list" ]; then
   # copy output to s3 job bucket
   aws s3 cp ${sopt}.lis ${jopt}/${runid}/${sopt}.lis
   aws s3 cp outfile.lis.csv ${jopt}/${runid}/outfile.lis.csv
+  aws s3 cp . ${jopt}/${runid}/ --recursive --exclude "*" --include "*.bin"
   if [ -n "$copt" ]; then
     aws s3 cp list100.log.txt ${jopt}/${runid}/list100.log.txt
   fi
