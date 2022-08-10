@@ -29,9 +29,9 @@ Setup should be done now.
 
 ### Running
 
-This was built with the assumption that inputs would be downloaded from a compressed diretory stored on AWS S3, 
+This was built with the assumption that inputs would be downloaded from a compressed directory stored on AWS S3, 
 and also pushes outputs back there. It would be pretty simple to modify it to just work with a mounted volume into the 
-running container's `/daycent` diretory though. Perhaps at some point I'll make that an option. Speaking of options:
+running container's `/daycent` directory though. Perhaps at some point I'll make that an option. Speaking of options:
 
 
 #### Command Line Options:
@@ -45,7 +45,7 @@ There's a number of command line options available beyond the ones that come wit
 - -e : extend file name, the binary file that will be read as a starting point (without the .bin extension)
 - -f : if set will download the binary extend file from an s3 uri like s3://daycentinputs/inputs/extend.bin
 - -i : s3 uri link to the s3 file containing the input directory that has been compressed into a .tgz, tar.gz, or zip file. (for example: s3://psitestdata/inputs/inputs.tgz)
-- -j : job s3 bucket. a uri for an s3 bucket to collect the job inputs/outputs. will contain the individual runs from this job set (s3://daycent-jobs/jobs/1234)
+- -j : job s3 bucket. A uri for an s3 bucket to collect the job inputs/outputs. will contain the individual runs from this job set (s3://daycent-jobs/jobs/1234)
 - -r : run id (optional) : just a folder name to tack on to the job s3 uri to store job specific info. If not set, one will be created with the name `run12345678` where 123455678 is replaced with the epoch time in seconds.
 - -o : copy entire run directory after the DayCent run to the s3 job/run/outputs directory (the directory gets created on the fly)
 - -d : s3 uri link to a "diff" archive. A .tgz or .zip file that will be downloaded and layered over top of the input directory after the input directory is downloaded and extracted. 
@@ -53,7 +53,7 @@ The expected format is a directory with the files in it that will be moved from 
 compress the entire directory, upload it to s3, and reference it with the `-d` option with something like `-d s3://my-daycent-jobs/jobs/inputs/diffs/diff.tgz`
 The idea is if you are doing runs where you want to just vary a few things in a few of the input files, you can just put those here and not have to create and store the entire input deck over and over.
 - -c : capture executable outputs as logfiles (optional). For example `-c yes` . If specified (with any value at all) it will redirect stdout and stderr to files called daycent.log.txt and list100.log.txt. 
-If not specified then the output will just be printed to stdout/stderr. The former is better for use with things like AWS batch, the later if you're running locally and want to watch the output as it runs. 
+If not specified then the output will just be printed to stdout/stderr. The former is better for use with things like AWS batch, the latter if you're running locally and want to watch the output as it runs. 
 
 Putting this all together to run a simple case with no extend file set looks like:
 
